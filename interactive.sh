@@ -89,8 +89,6 @@ ui_confirm() {
       else
         continue
       fi
-    else
-      echo ""
     fi
     
     if [[ "$input" == "y" ]]; then
