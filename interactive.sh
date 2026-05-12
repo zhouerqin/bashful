@@ -82,7 +82,10 @@ ui_confirm() {
   
   while true; do
     read -n 1 -p "$(echo -e "    ? ${C_BLUE}${prompt}${C_RESET} ${C_YELLOW}${default_display}${C_RESET}")" input
-    echo ""
+    
+    if [[ "$input" != $'\n' ]]; then
+      echo ""
+    fi
     
     if [[ -n "$default" && -z "$input" ]]; then
       input="$default"
