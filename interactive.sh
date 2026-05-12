@@ -81,16 +81,9 @@ ui_confirm() {
   fi
   
   while true; do
-    read -n 1 -p "$(echo -e "    ? ${C_BLUE}${prompt}${C_RESET} ${C_YELLOW}${default_display}${C_RESET}")" input
-    
-    if [[ "$input" == $'\n' ]]; then
-      if [[ -n "$default" ]]; then
-        input="$default"
-      else
-        echo ""
-        continue
-      fi
-    fi
+    read -n 1 -s -p "$(echo -e "    ? ${C_BLUE}${prompt}${C_RESET} ${C_YELLOW}${default_display}${C_RESET}")" input
+    echo ""
+    [[ -z "$input" && -n "$default" ]] && input="$default"
     
     if [[ "$input" == "y" ]]; then
       return 0
