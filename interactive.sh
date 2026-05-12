@@ -67,7 +67,7 @@ ui_confirm() {
   local input
   
   if [[ "$default" != "y" && "$default" != "n" ]]; then
-    echo -e "${C_YELLOW}    ⚠ ui_confirm: 默认值必须是 'y' 或 'n'，当前值 '$default' 将被忽略${C_RESET}" >&2
+    echo -e "${C_YELLOW}    ⚠ ui_confirm: 默认值必须是 'y' 或 'n'，当前值 '$default' 将被修正为 'n'${C_RESET}" >&2
     default="n"
   fi
   
