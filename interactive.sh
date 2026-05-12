@@ -66,6 +66,11 @@ ui_confirm() {
   local default="${2:-n}"
   local input
   
+  if [[ "$default" != "y" && "$default" != "n" ]]; then
+    echo -e "${C_YELLOW}    ⚠ ui_confirm: 默认值必须是 'y' 或 'n'，当前值 '$default' 将被忽略${C_RESET}" >&2
+    default="n"
+  fi
+  
   local default_display
   if [[ "$default" == "y" ]]; then
     default_display="[Y/n]"
