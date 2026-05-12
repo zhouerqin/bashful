@@ -81,10 +81,11 @@ ui_confirm() {
   fi
   
   while true; do
-    read -p "$(echo -e "    ? ${C_BLUE}${prompt}${C_RESET} ${C_YELLOW}${default_display}${C_RESET}")" input
+    read -n 1 -p "$(echo -e "    ? ${C_BLUE}${prompt}${C_RESET} ${C_YELLOW}${default_display}${C_RESET}")" input
+    echo ""
     
-    if [[ -n "$default" ]]; then
-      input="${input:-$default}"
+    if [[ -n "$default" && -z "$input" ]]; then
+      input="$default"
     fi
     
     if [[ "$input" == "y" ]]; then
