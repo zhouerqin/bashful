@@ -4,6 +4,7 @@
 # ==============================================================================
 
 source logger.sh
+source interactive.sh
 
 echo "========================================"
 echo "【演示 1】默认静默：普通用户看到什么？"
@@ -76,6 +77,30 @@ log_debug "调试信息也写入文件"
 echo "(已写入 $APP_LOG_FILE)"
 echo ""
 export APP_LOG_FILE=
+echo ""
+
+echo "========================================"
+echo "【演示 6】用户交互输入"
+echo "========================================"
+echo "# ui_prompt 提示用户输入，支持默认值"
+echo ""
+ui_header "Setup" "交互式配置"
+
+# 带默认值的输入
+NAME=$(ui_prompt "请输入您的名字" "张三")
+echo "您输入的名字: $NAME"
+
+# 不带默认值的输入
+EMAIL=$(ui_prompt "请输入邮箱")
+echo "您输入的邮箱: $EMAIL"
+
+# 确认提示
+if ui_confirm "是否保存配置？"; then
+    ui_success "配置已保存"
+else
+    ui_warn "配置未保存"
+fi
+
 echo ""
 
 echo "========================================"
