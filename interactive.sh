@@ -87,6 +87,7 @@ ui_confirm() {
       if [[ -n "$default" ]]; then
         input="$default"
       else
+        echo ""
         continue
       fi
     fi
@@ -95,8 +96,6 @@ ui_confirm() {
       return 0
     elif [[ "$input" == "n" ]]; then
       return 1
-    else
-      echo ""
     fi
   done
 }
