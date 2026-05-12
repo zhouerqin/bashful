@@ -91,8 +91,6 @@ ui_confirm() {
       return 0
     elif [[ "${input,,}" == "n" || "${input,,}" == "no" ]]; then
       return 1
-    elif [[ -z "$input" ]]; then
-      echo -e "${C_YELLOW}    ⚠ 请输入 y/n 或 yes/no${C_RESET}" >&2
     else
       echo -e "${C_YELLOW}    ⚠ 请输入 y/n 或 yes/no${C_RESET}" >&2
     fi
