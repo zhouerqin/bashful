@@ -1,5 +1,3 @@
-#!/bin/bash
-
 #!/usr/bin/env bash
 # ==============================================================================
 # 通用 Shell 日志库
@@ -10,16 +8,11 @@
 APP_LOG_LEVEL="${APP_LOG_LEVEL:-SILENT}"
 APP_LOG_FILE="${APP_LOG_FILE:-}"
 
-# 将字符串级别转换为数字
+declare -A LOG_LEVEL_MAP=(["DEBUG"]=0 ["INFO"]=1 ["WARN"]=2 ["ERROR"]=3 ["SILENT"]=4)
+
 __log_level_to_num() {
-  case "${1^^}" in
-    DEBUG) echo 0 ;;
-    INFO) echo 1 ;;
-    WARN) echo 2 ;;
-    ERROR) echo 3 ;;
-    SILENT) echo 4 ;;
-    *) echo 1 ;;
-  esac
+  local level="${1^^}"
+  echo "${LOG_LEVEL_MAP[$level]:-1}"
 }
 
 # 当前级别数字
@@ -61,6 +54,11 @@ _log() {
 
   # 输出目标判断
   if [[ -n "$APP_LOG_FILE" ]]; then
+    local log_dir=$(dirname "$APP_LOG_FILE")
+    if [[ ! -d "$log_dir" ]]; then
+      echo "ERROR: Log directory '$log_dir' does not exist" >&2
+      return 1
+    fi
     echo -e "$log_line" >>"$APP_LOG_FILE"
   else
     # 默认输出到标准错误 (STDERR)，避免污染标准输出 (STDOUT) 的管道数据
@@ -107,22 +105,16 @@ ui_error() {
 run_cmd() {
   local context="$1"
   shift
-  local cmd="$@"
 
-  # 1. 记录即将执行的命令到开发者日志
-  log_debug "Executing external command in [$context]: $cmd"
+  log_debug "Executing external command in [$context]: $*"
 
-  # 2. 执行命令，同时捕获 STDOUT 和 STDERR
   local output
   local exit_code
-  # 使用 eval 以支持带管道或重定向的复杂命令字符串
-  output=$(eval "$cmd" 2>&1)
+  output=$("$@" 2>&1)
   exit_code=$?
 
-  # 3. 将完整的命令输出和退出码写入开发者日志
   log_debug "Command exit code: $exit_code"
   log_debug "Command output:\n$(echo "$output" | sed 's/^/  /')"
 
-  # 4. 返回退出码供业务逻辑判断
   return $exit_code
 }
