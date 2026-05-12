@@ -57,35 +57,42 @@ ui_prompt_secret() {
 # 显示确认提示（是/否）
 # 参数:
 #   $1 - 提示文本
-#   $2 - 默认值（可选，y/n，默认为n）
+#   $2 - 默认值（可选，y/n），未设置则强制要求用户输入
 # 返回:
 #   0 表示确认，1 表示取消
 # ------------------------------------------------------------------------------
 ui_confirm() {
   local prompt="$1"
-  local default="${2:-n}"
+  local default="$2"
   local input
   
-  if [[ "$default" != "y" && "$default" != "n" ]]; then
-    echo -e "${C_YELLOW}    ⚠ ui_confirm: 默认值必须是 'y' 或 'n'，当前值 '$default' 将被修正为 'n'${C_RESET}" >&2
-    default="n"
+  if [[ -n "$default" && "$default" != "y" && "$default" != "n" ]]; then
+    echo -e "${C_YELLOW}    ⚠ ui_confirm: 默认值必须是 'y' 或 'n'，当前值 '$default' 将被忽略${C_RESET}" >&2
+    default=""
   fi
   
   local default_display
   if [[ "$default" == "y" ]]; then
     default_display="[Y/n]"
-  else
+  elif [[ "$default" == "n" ]]; then
     default_display="[y/N]"
+  else
+    default_display="[y/n]"
   fi
   
   while true; do
     read -p "$(echo -e "    ? ${C_BLUE}${prompt}${C_RESET} ${C_YELLOW}${default_display}${C_RESET}")" input
-    input="${input:-$default}"
+    
+    if [[ -n "$default" ]]; then
+      input="${input:-$default}"
+    fi
     
     if [[ "${input,,}" == "y" || "${input,,}" == "yes" ]]; then
       return 0
     elif [[ "${input,,}" == "n" || "${input,,}" == "no" ]]; then
       return 1
+    elif [[ -z "$input" ]]; then
+      echo -e "${C_YELLOW}    ⚠ 请输入 y/n 或 yes/no${C_RESET}" >&2
     else
       echo -e "${C_YELLOW}    ⚠ 请输入 y/n 或 yes/no${C_RESET}" >&2
     fi
