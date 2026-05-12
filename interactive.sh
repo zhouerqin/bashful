@@ -87,9 +87,9 @@ ui_confirm() {
       input="${input:-$default}"
     fi
     
-    if [[ "${input,,}" == "y" || "${input,,}" == "yes" ]]; then
+    if [[ "$input" == "y" ]]; then
       return 0
-    elif [[ "${input,,}" == "n" || "${input,,}" == "no" ]]; then
+    elif [[ "$input" == "n" ]]; then
       return 1
     fi
   done
