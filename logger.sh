@@ -109,9 +109,8 @@ run_cmd() {
   log_debug "Executing external command in [$context]: $*"
 
   local output
-  local exit_code
-  output=$("$@" 2>&1)
-  exit_code=$?
+  local exit_code=0
+  output=$("$@" 2>&1) || exit_code=$?
 
   log_debug "Command exit code: $exit_code"
   log_debug "Command output:\n$(echo "$output" | sed 's/^/  /')"
