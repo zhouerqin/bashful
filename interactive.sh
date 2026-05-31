@@ -65,7 +65,7 @@ ui_confirm() {
   local prompt="$1"
   local default="$2"
   local input
-  
+
   if [[ -n "$default" && "$default" != "y" && "$default" != "n" ]]; then
     echo -e "${C_YELLOW}    ⚠ ui_confirm: 默认值必须是 'y' 或 'n'，当前值 '$default' 将被忽略${C_RESET}" >&2
     default=""
@@ -81,9 +81,13 @@ ui_confirm() {
   fi
   
   while true; do
-    read -n 1 -s -p "$(echo -e "    ? ${C_BLUE}${prompt}${C_RESET} ${C_YELLOW}${default_display}${C_RESET}")" input
+    if ! read -n 1 -s -p "$(echo -e "    ? ${C_BLUE}${prompt}${C_RESET} ${C_YELLOW}${default_display}${C_RESET}")" input; then
+      [[ -n "$default" ]] && { [[ "$default" == "y" ]] && return 0 || return 1; }
+      return 1
+    fi
     echo ""
     [[ -z "$input" && -n "$default" ]] && input="$default"
+    input="${input,,}"
     
     if [[ "$input" == "y" ]]; then
       return 0
