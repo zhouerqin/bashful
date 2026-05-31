@@ -8,19 +8,20 @@
 APP_LOG_LEVEL="${APP_LOG_LEVEL:-SILENT}"
 APP_LOG_FILE="${APP_LOG_FILE:-}"
 
-declare -A LOG_LEVEL_MAP=(["DEBUG"]=0 ["INFO"]=1 ["WARN"]=2 ["ERROR"]=3 ["SILENT"]=4)
-
 __log_level_to_num() {
-  local level="${1^^}"
-  echo "${LOG_LEVEL_MAP[$level]:-1}"
+  case "$1" in
+    DEBUG|debug)   echo 0 ;;
+    INFO|info)     echo 1 ;;
+    WARN|warn)     echo 2 ;;
+    ERROR|error)   echo 3 ;;
+    SILENT|silent) echo 4 ;;
+    *)             echo 1 ;;
+  esac
 }
-
-# 当前级别数字
-_CURRENT_LOG_LEVEL=$(__log_level_to_num "$APP_LOG_LEVEL")
 
 # -------------------- 2. 颜色与格式定义 --------------------
 # 检测是否支持颜色，或遵守 NO_COLOR 标准
-if [[ -t 1 && -z "${NO_COLOR:-}" ]]; then
+if { [[ -t 1 ]] || [[ -t 2 ]]; } && [[ -z "${NO_COLOR:-}" ]]; then
   C_RED='\033[0;31m'
   C_GREEN='\033[0;32m'
   C_YELLOW='\033[0;33m'
@@ -45,9 +46,10 @@ _log() {
   [[ $_current_level -gt $level_num ]] && return 0
 
   # 获取调用者的信息（类似堆栈追踪）
-  local caller_file=$(basename "${BASH_SOURCE[2]}")
+  local caller_file="${BASH_SOURCE[2]##*/}"
   local caller_line="${BASH_LINENO[1]}"
-  local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+  local timestamp
+  printf -v timestamp '%(%Y-%m-%d %H:%M:%S)T' -1
 
   # 格式化日志内容
   local log_line="[${timestamp}] ${level_str} -- ${caller_file}:${caller_line}: ${message}"
