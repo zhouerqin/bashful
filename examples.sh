@@ -3,6 +3,8 @@
 # logger.sh 使用示例 - 展示核心设计哲学
 # ==============================================================================
 
+set -euo pipefail
+
 source logger.sh
 source interactive.sh
 

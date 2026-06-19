@@ -3,17 +3,7 @@
 # 交互式输入工具库
 # ==============================================================================
 
-# 检测是否支持颜色
-if [[ -t 1 && -z "${NO_COLOR:-}" ]]; then
-  C_RED='\033[0;31m'
-  C_GREEN='\033[0;32m'
-  C_YELLOW='\033[0;33m'
-  C_BLUE='\033[0;34m'
-  C_BOLD='\033[1m'
-  C_RESET='\033[0m'
-else
-  C_RED='' C_GREEN='' C_YELLOW='' C_BLUE='' C_BOLD='' C_RESET=''
-fi
+source "$(dirname "${BASH_SOURCE[0]}")/_colors.sh"
 
 # ------------------------------------------------------------------------------
 # 显示提示并读取用户输入，支持默认值
@@ -27,13 +17,18 @@ ui_prompt() {
   local prompt="$1"
   local default="${2:-}"
   local input
-  
-  if [[ -n "$default" ]]; then
-    read -p "$(echo -e "    ? ${C_BLUE}${prompt}${C_RESET} [${C_YELLOW}${default}${C_RESET}]: ")" input
-  else
-    read -p "$(echo -e "    ? ${C_BLUE}${prompt}${C_RESET}: ")" input
+
+  if [[ ! -t 0 ]]; then
+    echo "$default"
+    return 0
   fi
-  
+
+  if [[ -n "$default" ]]; then
+    read -r -p "$(echo -e "    ? ${C_BLUE}${prompt}${C_RESET} [${C_YELLOW}${default}${C_RESET}]: ")" input
+  else
+    read -r -p "$(echo -e "    ? ${C_BLUE}${prompt}${C_RESET}: ")" input
+  fi
+
   echo "${input:-$default}"
 }
 
@@ -47,8 +42,13 @@ ui_prompt() {
 ui_prompt_secret() {
   local prompt="$1"
   local input
-  
-  read -sp "$(echo -e "    ? ${C_BLUE}${prompt}${C_RESET}: ")" input
+
+  if [[ ! -t 0 ]]; then
+    echo ""
+    return 0
+  fi
+
+  read -r -s -p "$(echo -e "    ? ${C_BLUE}${prompt}${C_RESET}: ")" input
   echo ""
   echo "$input"
 }
@@ -63,7 +63,7 @@ ui_prompt_secret() {
 # ------------------------------------------------------------------------------
 ui_confirm() {
   local prompt="$1"
-  local default="$2"
+  local default="${2:-}"
   local input
 
   if [[ -n "$default" && "$default" != "y" && "$default" != "n" ]]; then
@@ -81,7 +81,7 @@ ui_confirm() {
   fi
   
   while true; do
-    if ! read -n 1 -s -p "$(echo -e "    ? ${C_BLUE}${prompt}${C_RESET} ${C_YELLOW}${default_display}${C_RESET}")" input; then
+    if ! read -r -n 1 -s -p "$(echo -e "    ? ${C_BLUE}${prompt}${C_RESET} ${C_YELLOW}${default_display}${C_RESET}")" input; then
       [[ -n "$default" ]] && { [[ "$default" == "y" ]] && return 0 || return 1; }
       return 1
     fi

@@ -27,6 +27,11 @@ log_error "error"
 - `ui_header "target"` — bold header with ==>
 - `ui_info` / `ui_success` / `ui_warn` / `ui_error` — formatted messages
 
+## Interactive Functions (interactive.sh)
+- `ui_prompt "prompt" [default]` — user text input with optional default
+- `ui_prompt_secret "prompt"` — silent input for passwords
+- `ui_confirm "prompt" [y/n]` — Y/N confirmation, returns 0/1
+
 ## Examples
 ```bash
 bash examples.sh  # 运行示例脚本
@@ -34,5 +39,7 @@ bash examples.sh  # 运行示例脚本
 
 ## Commands
 ```bash
-bash logger.sh  # run self-test (checks syntax)
+bash -n logger.sh interactive.sh _colors.sh examples.sh  # syntax check
+shellcheck -s bash logger.sh interactive.sh _colors.sh     # static analysis
+bats tests/                                                # run tests
 ```

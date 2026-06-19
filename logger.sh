@@ -3,6 +3,8 @@
 # 通用 Shell 日志库
 # ==============================================================================
 
+source "$(dirname "${BASH_SOURCE[0]}")/_colors.sh"
+
 # -------------------- 1. 配置与初始化 --------------------
 # 默认日志级别为 SILENT (DEBUG=0, INFO=1, WARN=2, ERROR=3, SILENT=4)
 APP_LOG_LEVEL="${APP_LOG_LEVEL:-SILENT}"
@@ -19,30 +21,18 @@ __log_level_to_num() {
   esac
 }
 
-# -------------------- 2. 颜色与格式定义 --------------------
-# 检测是否支持颜色，或遵守 NO_COLOR 标准
-if { [[ -t 1 ]] || [[ -t 2 ]]; } && [[ -z "${NO_COLOR:-}" ]]; then
-  C_RED='\033[0;31m'
-  C_GREEN='\033[0;32m'
-  C_YELLOW='\033[0;33m'
-  C_BLUE='\033[0;34m'
-  C_BOLD='\033[1m'
-  C_RESET='\033[0m'
-else
-  C_RED='' C_GREEN='' C_YELLOW='' C_BLUE='' C_BOLD='' C_RESET=''
-fi
-
-# -------------------- 3. 核心底层日志机制 (面向开发者) --------------------
+# -------------------- 2. 核心底层日志机制 (面向开发者) --------------------
 # _log <LEVEL_NUM> <LEVEL_STR> <MESSAGE>
 _log() {
   local level_num=$1
   shift
   local level_str=$1
   shift
-  local message="$@"
+  local message="$*"
 
   # 每次调用时动态读取级别，支持运行时修改 APP_LOG_LEVEL
-  local _current_level=$(__log_level_to_num "$APP_LOG_LEVEL")
+  local _current_level
+  _current_level=$(__log_level_to_num "$APP_LOG_LEVEL")
   [[ $_current_level -gt $level_num ]] && return 0
 
   # 获取调用者的信息（类似堆栈追踪）
@@ -56,7 +46,8 @@ _log() {
 
   # 输出目标判断
   if [[ -n "$APP_LOG_FILE" ]]; then
-    local log_dir=$(dirname "$APP_LOG_FILE")
+    local log_dir
+    log_dir=$(dirname "$APP_LOG_FILE")
     if [[ ! -d "$log_dir" ]]; then
       echo "ERROR: Log directory '$log_dir' does not exist" >&2
       return 1
@@ -80,25 +71,25 @@ log_error() { _log 3 "ERROR" "$@"; }
 
 ui_header() {
   local target="${1:-default}"
-  echo -e "${C_BOLD}==> ${target}:${C_RESET} ${@:2}"
+  echo -e "${C_BOLD}==> ${target}:${C_RESET} ${*:2}"
 }
 
 ui_info() {
-  echo -e "    ℹ ${C_RESET}${@}"
+  echo -e "    ℹ ${C_RESET}${*}"
 }
 
 ui_success() {
-  echo -e "${C_GREEN}    ✔ ${C_RESET}${@}"
+  echo -e "${C_GREEN}    ✔ ${C_RESET}${*}"
 }
 
 ui_warn() {
-  echo -e "${C_YELLOW}    ⚠ ${C_RESET}${@}" >&2
+  echo -e "${C_YELLOW}    ⚠ ${C_RESET}${*}" >&2
 }
 
 ui_error() {
-  echo -e "${C_RED}    ✖ ${C_RESET}${@}" >&2
+  echo -e "${C_RED}    ✖ ${C_RESET}${*}" >&2
   # UI 报错时，自动向日志系统追加详细信息（因为 UI 层通常没有细节）
-  log_error "[UI] $@"
+  log_error "[UI] $*"
 }
 
 # -------------------- 6. 子进程拦截器 --------------------
@@ -115,6 +106,7 @@ run_cmd() {
   output=$("$@" 2>&1) || exit_code=$?
 
   log_debug "Command exit code: $exit_code"
+  # shellcheck disable=SC2001
   log_debug "Command output:\n$(echo "$output" | sed 's/^/  /')"
 
   return $exit_code
